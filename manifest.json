@@ -1,0 +1,20 @@
+
+{
+  "name": "Finanza360 - Finanze personali",
+  "short_name": "Finanza360",
+  "description": "Dashboard personale per patrimonio, movimenti, investimenti e tasse.",
+  "lang": "it-IT",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f4f7f5",
+  "theme_color": "#153d32",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

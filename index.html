@@ -1,0 +1,199 @@
+
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#153d32">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>Finanza360</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<style>
+:root{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#192c25;background:#f4f7f5;--green:#176b4b;--muted:#6a7b73;--card:#fff;--line:#e0e9e3}
+*{box-sizing:border-box}body{margin:0;padding:0 0 88px}header{background:#153d32;color:white;padding:22px 18px 26px;border-radius:0 0 24px 24px}
+.brand{font-size:21px;font-weight:750;letter-spacing:-.5px}.sub{font-size:12px;opacity:.75;margin-top:5px}.eyebrow{font-size:12px;opacity:.8;margin-top:26px}.total{font-size:35px;font-weight:750;letter-spacing:-1px;margin:7px 0}.notice{font-size:11px;opacity:.8}
+main{max-width:650px;margin:auto;padding:16px}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:15px;margin-bottom:12px;min-width:0}.label{font-size:12px;color:var(--muted)}.value{font-size:21px;font-weight:750;margin-top:7px;overflow-wrap:anywhere}.positive{color:#168052}.negative{color:#b44848}.section-title{font-size:18px;font-weight:750;margin:22px 0 12px}.row{display:flex;align-items:center;justify-content:space-between;gap:12px}.row+.row{margin-top:12px}.muted{color:var(--muted);font-size:12px}.movement{padding:13px 0;border-bottom:1px solid var(--line)}.movement:last-child{border:0}.movement-name{font-weight:650;font-size:14px}.pill{display:inline-block;background:#e7f2eb;color:#176b4b;border-radius:8px;padding:5px 8px;font-size:11px}
+nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:9px 3px max(9px,env(safe-area-inset-bottom));z-index:5}
+nav button{border:0;background:transparent;color:var(--muted);font-size:11px;padding:7px 3px;flex:1}nav button.active{color:var(--green);font-weight:750}nav span{display:block;font-size:19px;margin-bottom:3px}
+button,.button{font:inherit;cursor:pointer;border-radius:10px;padding:11px 13px;border:1px solid var(--line);background:white;color:#193d30}
+.primary{background:var(--green);color:white;border-color:var(--green)}.danger{color:#b44848}.actions{display:flex;gap:8px;flex-wrap:wrap}
+input,select,textarea{display:block;width:100%;font:inherit;font-size:16px;padding:12px;border:1px solid #d4e0d8;border-radius:10px;background:#fff;color:#192c25;margin:6px 0 13px}
+label{font-size:12px;font-weight:650;color:#51665b}form{padding-top:10px}.empty{padding:22px;text-align:center;color:var(--muted);font-size:13px}.small{font-size:12px;color:var(--muted);line-height:1.6}.asset-input{width:125px;text-align:right;margin:0}
+.hidden{display:none!important}h2{font-size:19px;margin:5px 0 14px}h3{font-size:15px;margin:0 0 8px}
+@media(min-width:600px){body{padding-bottom:20px}header{padding:28px calc((100% - 610px)/2 + 20px)}nav{position:static;max-width:650px;margin:15px auto;border:1px solid var(--line);border-radius:14px}main{padding-top:4px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">◈ Finanza360</div>
+  <div class="sub">IL TUO CENTRO FINANZIARIO PERSONALE</div>
+  <div class="eyebrow">PATRIMONIO REGISTRATO</div>
+  <div class="total" id="total">€ 0,00</div>
+  <div class="notice">Valori inseriti da te · aggiornamento locale</div>
+</header>
+<main>
+  <section id="home">
+    <div class="section-title">Il tuo patrimonio</div>
+    <div class="grid" id="assetCards"></div>
+    <div class="section-title">Bilancio del mese</div>
+    <div class="grid">
+      <div class="card"><div class="label">Entrate</div><div class="value positive" id="income">€ 0,00</div></div>
+      <div class="card"><div class="label">Uscite</div><div class="value negative" id="expense">€ 0,00</div></div>
+    </div>
+    <div class="card"><div class="row"><div><h3>Risultato del mese</h3><div class="muted">Entrate meno uscite registrate</div></div><strong id="net">€ 0,00</strong></div></div>
+    <div class="section-title">Ultimi movimenti</div>
+    <div class="card" id="recent"></div>
+  </section>
+
+  <section id="movements" class="hidden">
+    <h2>Movimenti</h2>
+    <div class="card">
+      <h3>Aggiungi una transazione</h3>
+      <form id="movementForm">
+        <label for="description">Descrizione</label><input id="description" required maxlength="100" placeholder="Es. Spesa supermercato">
+        <label for="amount">Importo in euro</label><input id="amount" type="number" required min="0.01" step="0.01" placeholder="0,00">
+        <label for="type">Tipo di movimento</label>
+        <select id="type"><option value="expense">Uscita</option><option value="income">Entrata</option><option value="transfer">Trasferimento interno</option><option value="investment">Acquisto investimento</option><option value="sale">Vendita investimento</option></select>
+        <label for="category">Categoria</label>
+        <select id="category"><option>Generale</option><option>Stipendio</option><option>Casa</option><option>Alimentari</option><option>Trasporti</option><option>Salute</option><option>Investimenti</option><option>Crypto</option><option>Dividendi</option><option>Tasse</option><option>Altro</option></select>
+        <label for="date">Data</label><input id="date" type="date" required>
+        <button class="primary" type="submit">+ Registra movimento</button>
+      </form>
+    </div>
+    <div class="section-title">Storico</div>
+    <div class="card" id="allMovements"></div>
+  </section>
+
+  <section id="investments" class="hidden">
+    <h2>Patrimonio e investimenti</h2>
+    <p class="small">Inserisci i valori attuali dei tuoi conti. Sono importi patrimoniali, non profitti. Non collegare ancora credenziali o chiavi API.</p>
+    <div class="card" id="assetEditor"></div>
+    <div class="card">
+      <h3>Prossime funzioni</h3>
+      <p class="small">Prezzi di mercato, costo medio di acquisto, plusvalenze realizzate e non realizzate, commissioni e collegamento agli exchange compatibili.</p>
+    </div>
+  </section>
+
+  <section id="taxes" class="hidden">
+    <h2>Centro fiscale</h2>
+    <div class="card">
+      <h3>Riserva fiscale personale</h3>
+      <p class="small">Importo che vuoi tenere da parte. Non è una stima automatica dell'imposta dovuta.</p>
+      <label for="reserve">Riserva da accantonare (€)</label>
+      <input id="reserve" type="number" min="0" step="0.01">
+      <button class="primary" id="saveReserve">Salva riserva</button>
+      <div class="section-title">Promemoria</div>
+      <label for="taxNotes">Scadenze e note fiscali</label>
+      <textarea id="taxNotes" rows="5" placeholder="Annota scadenze da verificare con il commercialista..."></textarea>
+      <button id="saveNotes">Salva note</button>
+    </div>
+    <div class="card">
+      <h3>Documenti e fiscalità italiana</h3>
+      <p class="small">Per calcolare correttamente le imposte occorre importare lo storico completo delle operazioni, commissioni, prezzi di acquisto e vendite. Questa versione non calcola ancora le imposte e non sostituisce la dichiarazione fiscale.</p>
+    </div>
+  </section>
+
+  <section id="settings" class="hidden">
+    <h2>Dati e backup</h2>
+    <div class="card">
+      <h3>Esporta il backup</h3>
+      <p class="small">Scarica un file contenente movimenti, patrimonio e impostazioni. Conservalo in un posto privato e sicuro.</p>
+      <button class="primary" id="export">Esporta backup JSON</button>
+    </div>
+    <div class="card">
+      <h3>Ripristina backup</h3>
+      <p class="small">Importare un backup sostituisce i dati presenti sul dispositivo.</p>
+      <input id="importFile" type="file" accept=".json,application/json">
+      <button id="import" class="danger">Ripristina dati</button>
+    </div>
+    <div class="card">
+      <h3>Privacy</h3>
+      <p class="small">I dati di questa versione sono salvati nel browser. Non inserire password bancarie, PIN, seed phrase o chiavi private. I backup JSON non sono cifrati automaticamente.</p>
+      <button id="reset" class="danger">Cancella tutti i dati locali</button>
+    </div>
+  </section>
+  <p class="small">Finanza360 · prototipo personale gratuito. Verifica sempre i dati prima di prendere decisioni finanziarie.</p>
+</main>
+<nav aria-label="Navigazione principale">
+  <button class="active" data-tab="home"><span>⌂</span>Home</button>
+  <button data-tab="movements"><span>⇄</span>Movimenti</button>
+  <button data-tab="investments"><span>▥</span>Patrimonio</button>
+  <button data-tab="taxes"><span>€</span>Tasse</button>
+  <button data-tab="settings"><span>⚙</span>Dati</button>
+</nav>
+<script>
+const KEY="finanza360-v1";
+const initial=()=>({
+ assets:[{name:"Banche",value:0},{name:"Trading",value:0},{name:"Crypto",value:0},{name:"Altri risparmi",value:0}],
+ movements:[],reserve:0,taxNotes:""
+});
+let data;
+try{data=JSON.parse(localStorage.getItem(KEY))||initial()}catch{data=initial()}
+const $=id=>document.getElementById(id);
+const euro=n=>new Intl.NumberFormat("it-IT",{style:"currency",currency:"EUR"}).format(Number(n)||0);
+const safe=(s)=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function save(){localStorage.setItem(KEY,JSON.stringify(data));render()}
+function signed(m){return m.type==="income"?Number(m.amount):-Number(m.amount)}
+function labelType(t){return ({income:"Entrata",expense:"Uscita",transfer:"Trasferimento",investment:"Acquisto investimento",sale:"Vendita investimento"})[t]||t}
+function render(){
+ $("total").textContent=euro(data.assets.reduce((s,a)=>s+Number(a.value||0),0));
+ const now=new Date(),month=String(now.getMonth()+1).padStart(2,"0"),year=now.getFullYear();
+ const ms=data.movements.filter(m=>m.date&&m.date.startsWith(`${year}-${month}`));
+ const inc=ms.filter(m=>m.type==="income").reduce((s,m)=>s+Number(m.amount),0);
+ const exp=ms.filter(m=>m.type==="expense").reduce((s,m)=>s+Number(m.amount),0);
+ $("income").textContent=euro(inc);$("expense").textContent=euro(exp);$("net").textContent=euro(inc-exp);
+ $("assetCards").innerHTML=data.assets.map(a=>`<div class="card"><div class="label">${safe(a.name)}</div><div class="value">${euro(a.value)}</div></div>`).join("");
+ const item=m=>`<div class="row movement"><div><div class="movement-name">${safe(m.description)}</div><div class="muted">${safe(m.date)} · ${safe(m.category)} · ${labelType(m.type)}</div></div><strong class="${m.type==="income"?"positive":m.type==="expense"?"negative":""}">${m.type==="income"?"+":m.type==="expense"?"−":""}${euro(m.amount)}</strong><button data-delete="${m.id}" aria-label="Elimina movimento">×</button></div>`;
+ const sorted=[...data.movements].sort((a,b)=>b.date.localeCompare(a.date));
+ $("recent").innerHTML=sorted.slice(0,5).map(item).join("")||'<div class="empty">Nessun movimento. Aggiungi la tua prima transazione.</div>';
+ $("allMovements").innerHTML=sorted.map(item).join("")||'<div class="empty">Lo storico è vuoto.</div>';
+ $("assetEditor").innerHTML=data.assets.map((a,i)=>`<div class="row movement"><div><div class="movement-name">${safe(a.name)}</div><div class="muted">Valore attuale in euro</div></div><input class="asset-input" type="number" min="0" step=".01" value="${Number(a.value)||0}" data-asset="${i}" aria-label="Valore ${safe(a.name)}"></div>`).join("");
+ $("reserve").value=Number(data.reserve)||0;$("taxNotes").value=data.taxNotes||"";
+}
+document.querySelectorAll("nav [data-tab]").forEach(b=>b.addEventListener("click",()=>{
+ document.querySelectorAll("main section").forEach(s=>s.classList.add("hidden"));
+ $(b.dataset.tab).classList.remove("hidden");
+ document.querySelectorAll("nav button").forEach(x=>x.classList.toggle("active",x===b));
+}));
+$("date").value=new Date().toISOString().slice(0,10);
+$("movementForm").addEventListener("submit",e=>{
+ e.preventDefault();const amount=Number($("amount").value);
+ if(!Number.isFinite(amount)||amount<=0)return;
+ data.movements.push({id:crypto.randomUUID?crypto.randomUUID():String(Date.now()),description:$("description").value.trim(),amount,type:$("type").value,category:$("category").value,date:$("date").value});
+ $("movementForm").reset();$("date").value=new Date().toISOString().slice(0,10);save();
+});
+document.addEventListener("click",e=>{
+ const b=e.target.closest("[data-delete]");
+ if(b&&confirm("Eliminare questo movimento?")){data.movements=data.movements.filter(m=>m.id!==b.dataset.delete);save()}
+});
+document.addEventListener("change",e=>{
+ if(e.target.matches("[data-asset]")){
+  const i=Number(e.target.dataset.asset),v=Number(e.target.value);
+  if(Number.isFinite(v)&&v>=0){data.assets[i].value=v;save()}
+ }
+});
+$("saveReserve").onclick=()=>{data.reserve=Math.max(0,Number($("reserve").value)||0);save();alert("Riserva salvata.")};
+$("saveNotes").onclick=()=>{data.taxNotes=$("taxNotes").value;save();alert("Note salvate.")};
+$("export").onclick=()=>{
+ const blob=new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),data},null,2)],{type:"application/json"});
+ const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="finanza360-backup.json";a.click();URL.revokeObjectURL(url)
+};
+$("import").onclick=async()=>{
+ const file=$("importFile").files[0];if(!file)return alert("Seleziona prima un file JSON.");
+ try{
+  const parsed=JSON.parse(await file.text()),d=parsed.data||parsed;
+  if(!Array.isArray(d.assets)||!Array.isArray(d.movements))throw Error();
+  if(!confirm("Il ripristino sostituirà i dati attuali. Continuare?"))return;
+  data={...initial(),...d};save();alert("Backup ripristinato.")
+ }catch{alert("File non valido o formato non riconosciuto.")}
+};
+$("reset").onclick=()=>{if(confirm("ATTENZIONE: cancellare tutti i dati locali di Finanza360? Esporta prima un backup se vuoi conservarli.")){data=initial();save()}};
+if("serviceWorker" in navigator && location.protocol!=="file:"){
+ window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));
+}
+render();
+</script>
+</body>
+</html>
